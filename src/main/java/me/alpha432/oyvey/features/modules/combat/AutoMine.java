@@ -34,6 +34,8 @@ public class AutoMine extends Module {
     private final Setting<BlockerSequence> blocker = mode("Blocker", BlockerSequence.None);
     private final Setting<Boolean> face = bool("Face", false);
     private final Setting<Boolean> aboveHead = bool("Head", false);
+    private final Setting<Boolean> packetMine = bool("PacketMine", true);
+    private final Setting<Boolean> instantMine = bool("InstantMine", true);
     private final Setting<Boolean> antiCrawl = bool("AntiCrawl", true);
     private final Setting<Boolean> doubleMine = bool("DoubleMine", false);
     private final Setting<Boolean> cev = bool("Cev", false);
@@ -76,7 +78,7 @@ public class AutoMine extends Module {
                 || mc.interactionManager.getCurrentGameMode() == GameMode.SPECTATOR) return;
 
         PacketMine miner = OyVey.moduleManager.getModuleByClass(PacketMine.class);
-        if (miner == null || !miner.isEnabled()) return;
+        if (!packetMine.getValue() || miner == null || !miner.isEnabled()) return;
 
         tickCevPost();
 
@@ -122,6 +124,7 @@ public class AutoMine extends Module {
     private void startMining(PacketMine miner, BlockPos pos) {
         if (pos == null || isInvalid(pos) || isOutOfRange(pos)) return;
         position = pos;
+        miner.setInstantMine(instantMine.getValue());
         miner.startMiningPos(pos, nullDirection(pos), doubleMine.getValue());
     }
 
