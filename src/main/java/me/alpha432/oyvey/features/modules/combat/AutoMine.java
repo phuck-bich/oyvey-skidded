@@ -200,7 +200,7 @@ public class AutoMine extends Module {
         return score;
     }
 
-    private void handleBlockerMining(SpeedMine miner, PlayerEntity player) {
+    private void handleBlockerMining(PacketMine miner, PlayerEntity player) {
         if (blocker.getValue() == BlockerSequence.None) return;
 
         Set<BlockPos> feet = getFeetPositions(player);
@@ -356,7 +356,7 @@ public class AutoMine extends Module {
 
         // Place the crystal immediately before the block finishes.
         // This mirrors Sydney's CEV timing while using vanilla interaction calls.
-        SpeedMine miner = OyVey.moduleManager.getModuleByClass(SpeedMine.class);
+        PacketMine miner = OyVey.moduleManager.getModuleByClass(PacketMine.class);
         if (miner == null) return;
 
         BlockPos crystalPos = miningPos.up();
