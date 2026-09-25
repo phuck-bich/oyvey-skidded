@@ -2,7 +2,7 @@ package me.alpha432.oyvey.features.modules.combat;
 
 import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.features.modules.Module;
-import me.alpha432.oyvey.features.modules.player.SpeedMine;
+import me.alpha432.oyvey.features.modules.misc.PacketMine;
 import me.alpha432.oyvey.features.settings.Setting;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -75,7 +75,7 @@ public class AutoMine extends Module {
                 || mc.interactionManager.getCurrentGameMode() == GameMode.CREATIVE
                 || mc.interactionManager.getCurrentGameMode() == GameMode.SPECTATOR) return;
 
-        SpeedMine miner = OyVey.moduleManager.getModuleByClass(SpeedMine.class);
+        PacketMine miner = OyVey.moduleManager.getModuleByClass(PacketMine.class);
         if (miner == null || !miner.isEnabled()) return;
 
         tickCevPost();
@@ -119,10 +119,10 @@ public class AutoMine extends Module {
         }
     }
 
-    private void startMining(SpeedMine miner, BlockPos pos) {
+    private void startMining(PacketMine miner, BlockPos pos) {
         if (pos == null || isInvalid(pos) || isOutOfRange(pos)) return;
         position = pos;
-        miner.startMining(pos);
+        miner.startMiningPos(pos, nullDirection(pos), doubleMine.getValue());
     }
 
     private BlockPos findHighestPriorityBlock(PlayerEntity player) {
