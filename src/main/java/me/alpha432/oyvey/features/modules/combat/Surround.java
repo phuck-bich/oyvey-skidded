@@ -114,9 +114,7 @@ public class Surround extends Module {
         if (slot == -1) return;
 
         int previous = mc.player.getInventory().getSelectedSlot();
-        if (!mc.player.getMainHandStack().isOf(Items.OBSIDIAN)
-                && !mc.player.getMainHandStack().isOf(Items.CRYING_OBSIDIAN)
-                && !mc.player.getMainHandStack().isOf(Items.NETHERITE_BLOCK)) {
+        if (!isAllowedBlock(mc.player.getMainHandStack())) {
             mc.player.getInventory().setSelectedSlot(slot);
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         }
