@@ -10,7 +10,6 @@ import me.alpha432.oyvey.util.KeyboardUtil;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
-import java.security.Key;
 
 public class BindCommand
         extends Command {
@@ -24,14 +23,14 @@ public class BindCommand
 
     @Override
     public void execute(String[] commands) {
-        if (commands.length == 1) {
+        if (commands.length == 0) {
             sendMessage("Please specify a module.");
             return;
         }
         String moduleName = commands[0];
         Module module = OyVey.moduleManager.getModuleByName(moduleName);
         if (module == null) {
-            sendMessage("Unknown module '" + module + "'!");
+            sendMessage("Unknown module '" + moduleName + "'!");
             return;
         }
 

@@ -12,8 +12,12 @@ public class PrefixCommand
 
     @Override
     public void execute(String[] commands) {
-        if (commands.length == 1) {
+        if (commands.length == 0) {
             Command.sendMessage(Formatting.GREEN + "Current prefix is " + OyVey.commandManager.getPrefix());
+            return;
+        }
+        if (commands.length != 1 || commands[0].isBlank()) {
+            Command.sendMessage("Usage: " + OyVey.commandManager.getPrefix() + "prefix <prefix>");
             return;
         }
         OyVey.commandManager.setPrefix(commands[0]);

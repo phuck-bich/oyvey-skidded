@@ -12,7 +12,7 @@ public class FriendCommand
 
     @Override
     public void execute(String[] commands) {
-        if (commands.length == 1) {
+        if (commands.length == 0) {
             if (OyVey.friendManager.getFriends().isEmpty()) {
                 FriendCommand.sendMessage("Friend list empty D:.");
             } else {
@@ -27,8 +27,8 @@ public class FriendCommand
             }
             return;
         }
-        if (commands.length == 2) {
-            if (commands[0].equals("reset")) {
+        if (commands.length == 1) {
+            if (commands[0].equalsIgnoreCase("reset") || commands[0].equalsIgnoreCase("clear")) {
                 OyVey.friendManager.getFriends().clear();
                 FriendCommand.sendMessage("Friends got reset.");
                 return;
@@ -36,8 +36,8 @@ public class FriendCommand
             FriendCommand.sendMessage(commands[0] + (OyVey.friendManager.isFriend(commands[0]) ? " is friended." : " isn't friended."));
             return;
         }
-        if (commands.length >= 2) {
-            switch (commands[0]) {
+        if (commands.length == 2) {
+            switch (commands[0].toLowerCase()) {
                 case "add" -> {
                     OyVey.friendManager.addFriend(commands[1]);
                     FriendCommand.sendMessage(Formatting.GREEN + commands[1] + " has been friended");
@@ -50,6 +50,8 @@ public class FriendCommand
                 }
             }
             FriendCommand.sendMessage("Unknown Command, try friend add/del (name)");
+            return;
         }
+        FriendCommand.sendMessage("Usage: " + OyVey.commandManager.getPrefix() + "friend <add|del|name|clear> [name]");
     }
 }

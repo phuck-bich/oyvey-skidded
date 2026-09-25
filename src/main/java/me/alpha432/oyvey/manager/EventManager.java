@@ -89,8 +89,8 @@ public class EventManager extends Feature {
         if (event.getMessage().startsWith(Command.getCommandPrefix())) {
             event.cancel();
             try {
-                if (event.getMessage().length() > 1) {
-                    OyVey.commandManager.executeCommand(event.getMessage().substring(Command.getCommandPrefix().length() - 1));
+                if (event.getMessage().length() > Command.getCommandPrefix().length()) {
+                    OyVey.commandManager.executeCommand(event.getMessage().substring(Command.getCommandPrefix().length()));
                 } else {
                     Command.sendMessage("Please enter a command.");
                 }
