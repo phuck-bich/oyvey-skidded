@@ -19,7 +19,7 @@ public class Step extends Module {
             prev = 0.6f;
             return;
         }
-        prev = mc.player.getStepHeight();
+        prev = (float) mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).getBaseValue();
     }
 
     @Override public void onDisable() {
