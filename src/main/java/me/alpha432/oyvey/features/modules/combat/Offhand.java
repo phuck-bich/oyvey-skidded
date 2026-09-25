@@ -1,6 +1,8 @@
 package me.alpha432.oyvey.features.modules.combat;
 
 import me.alpha432.oyvey.OyVey;
+import com.google.common.eventbus.Subscribe;
+import me.alpha432.oyvey.event.impl.PacketEvent;
 import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.features.settings.Setting;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -64,7 +66,7 @@ public class Offhand extends Module {
     }
 
     @Override
-    public void onPacketReceive(EntityStatusS2CPacket packet) {
+    @Subscribe\n    public void onPacketReceive(PacketEvent.Receive event) {\n        if (!(event.getPacket() instanceof EntityStatusS2CPacket packet)) return;
         if (nullCheck()) return;
         if (packet.getEntity(mc.world) == mc.player && packet.getStatus() == 35
                 && getTotalHealth() <= health.getValue()) {
