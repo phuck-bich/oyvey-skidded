@@ -20,7 +20,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -365,7 +364,7 @@ public class PistonCrystal extends Module {
         }
 
         if (step == 1) {
-            spoofPistonFacing(structure.facing());
+            spoofPistonFacing(structure.facing().getOpposite());
         }
 
         var result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit);
