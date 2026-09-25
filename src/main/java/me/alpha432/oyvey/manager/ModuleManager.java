@@ -8,6 +8,8 @@ import me.alpha432.oyvey.features.Feature;
 import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.features.modules.client.ClickGui;
 import me.alpha432.oyvey.features.modules.client.HudFeature;
+import me.alpha432.oyvey.features.modules.client.FontFeature;
+import me.alpha432.oyvey.features.modules.client.Notifications;
 import me.alpha432.oyvey.features.modules.combat.Criticals;
 import me.alpha432.oyvey.features.modules.combat.CrystalAura;
 import me.alpha432.oyvey.features.modules.combat.PistonCrystal;
@@ -44,6 +46,8 @@ public class ModuleManager implements Jsonable, Util {
 
     public void init() {
         modules.add(new HudFeature());
+        modules.add(new FontFeature());
+        modules.add(new Notifications());
         modules.add(new ClickGui());
         modules.add(new Criticals());
         modules.add(new CrystalAura());
