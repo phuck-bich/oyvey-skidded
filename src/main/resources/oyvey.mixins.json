@@ -19,7 +19,10 @@
     "MixinRenderTickCounter",
     "MixinWorldRenderer",
     "MixinItemStack",
-    "MixinPlayerListHud"
+    "MixinPlayerListHud",
+    "MixinBossBarHud",
+    "MixinCamera",
+    "MixinEntityRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

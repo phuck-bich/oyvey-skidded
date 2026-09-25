@@ -54,6 +54,10 @@ import me.alpha432.oyvey.features.modules.render.Trajectories;
 import me.alpha432.oyvey.features.modules.render.BetterTooltips;
 import me.alpha432.oyvey.features.modules.render.BetterTab;
 import me.alpha432.oyvey.features.modules.render.PopChams;
+import me.alpha432.oyvey.features.modules.render.BossStack;
+import me.alpha432.oyvey.features.modules.render.Freecam;
+import me.alpha432.oyvey.features.modules.render.Nametags;
+import me.alpha432.oyvey.features.modules.render.Chams;
 import me.alpha432.oyvey.util.traits.Jsonable;
 import me.alpha432.oyvey.util.traits.Util;
 
@@ -116,6 +120,10 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new BetterTooltips());
         modules.add(new BetterTab());
         modules.add(new PopChams());
+        modules.add(new BossStack());
+        modules.add(new Freecam());
+        modules.add(new Nametags());
+        modules.add(new Chams());
         modules.add(new NoFall());
     }
 
