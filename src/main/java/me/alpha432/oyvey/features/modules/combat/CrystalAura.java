@@ -133,6 +133,10 @@ public class CrystalAura extends Module {
 
     @Override
     public void onDisable() {
+        if (calculationTask != null) {
+            calculationTask.cancel(true);
+            calculationTask = null;
+        }
         calculated = null;
         activeResult = null;
         renderPlacePos = null;
@@ -172,7 +176,7 @@ public class CrystalAura extends Module {
         if (useThread.getValue()) {
             calculationTask = calculationExecutor.submit(() -> {
                 CalculationResult result = calculate(snapshot);
-                if (result != null) calculated = result;
+                calculated = result;
             });
         } else {
             CalculationResult result = calculate(snapshot);
