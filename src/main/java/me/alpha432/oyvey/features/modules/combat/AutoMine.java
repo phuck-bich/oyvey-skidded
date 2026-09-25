@@ -124,8 +124,12 @@ public class AutoMine extends Module {
     private void startMining(PacketMine miner, BlockPos pos) {
         if (pos == null || isInvalid(pos) || isOutOfRange(pos)) return;
         position = pos;
-        miner.setInstantMine(instantMine.getValue());
-        miner.startMiningPos(pos, nullDirection(pos), doubleMine.getValue());
+        miner.startMiningPos(
+                pos,
+                nullDirection(pos),
+                doubleMine.getValue(),
+                instantMine.getValue()
+        );
     }
 
     private BlockPos findHighestPriorityBlock(PlayerEntity player) {
