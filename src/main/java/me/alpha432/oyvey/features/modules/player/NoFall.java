@@ -11,7 +11,8 @@ public class NoFall extends Module {
 
     @Override
     public void onUpdate() {
-        if( !mc.player.isOnGround() && OyVey.positionManager.getFallDistance() > 3 )
+        if (nullCheck()) return;
+        if (!mc.player.isOnGround() && OyVey.positionManager.getFallDistance() > 3 )
         {
             boolean bl = mc.player.horizontalCollision;
             PlayerMoveC2SPacket.Full pakcet = new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY() + 0.000000001, mc.player.getZ(),
