@@ -10,6 +10,7 @@ import me.alpha432.oyvey.features.modules.client.ClickGui;
 import me.alpha432.oyvey.features.modules.client.HudModule;
 import me.alpha432.oyvey.features.modules.combat.Criticals;
 import me.alpha432.oyvey.features.modules.combat.CrystalAura;
+import me.alpha432.oyvey.features.modules.combat.Surround;
 import me.alpha432.oyvey.features.modules.misc.MCF;
 import me.alpha432.oyvey.features.modules.movement.ReverseStep;
 import me.alpha432.oyvey.features.modules.movement.Step;
@@ -36,6 +37,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new ClickGui());
         modules.add(new Criticals());
         modules.add(new CrystalAura());
+        modules.add(new Surround());
         modules.add(new MCF());
         modules.add(new Step());
         modules.add(new ReverseStep());
