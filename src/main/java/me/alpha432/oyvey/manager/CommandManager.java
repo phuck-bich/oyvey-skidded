@@ -42,7 +42,8 @@ public class CommandManager
         String name = parts.get(0);
         String[] args = parts.subList(1, parts.size()).toArray(String[]::new);
         for (Command c : this.commands) {
-            if (!c.getName().equalsIgnoreCase(name)) continue;
+            boolean fakePlayerAlias = c.getName().equalsIgnoreCase("fake-player") && name.equalsIgnoreCase("fakeplayer");
+            if (!c.getName().equalsIgnoreCase(name) && !fakePlayerAlias) continue;
             c.execute(args);
             return;
         }

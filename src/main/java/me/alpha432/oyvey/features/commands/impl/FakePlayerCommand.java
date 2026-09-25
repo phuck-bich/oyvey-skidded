@@ -2,7 +2,6 @@ package me.alpha432.oyvey.features.commands.impl;
 
 import me.alpha432.oyvey.features.commands.Command;
 import me.alpha432.oyvey.util.entity.FakePlayerEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.Formatting;
 
 import java.util.LinkedHashMap;
@@ -13,7 +12,7 @@ public class FakePlayerCommand extends Command {
     private final Map<String, FakePlayerEntity> fakePlayers = new LinkedHashMap<>();
 
     public FakePlayerCommand() {
-        super("fakeplayer", new String[]{"<spawn|remove|list|clear>", "[name]"});
+        super("fake-player", new String[]{"<add|remove|list|clear>", "[name]"});
     }
 
     @Override
@@ -24,7 +23,7 @@ public class FakePlayerCommand extends Command {
         }
         discardStaleEntries();
         if (args.length == 0) {
-            spawn("FakePlayer");
+            usage();
             return;
         }
 
@@ -38,17 +37,14 @@ public class FakePlayerCommand extends Command {
             }
             case "remove", "despawn", "del" -> {
                 if (args.length != 2) {
-                    sendMessage("Usage: " + getCommandPrefix() + "fakeplayer remove <name>");
+                    sendMessage("Usage: " + getCommandPrefix() + "fake-player remove <name>");
                     return;
                 }
                 remove(args[1]);
             }
             case "list" -> list();
             case "clear" -> clear();
-            default -> {
-                if (args.length == 1) spawn(args[0]);
-                else usage();
-            }
+            default -> usage();
         }
     }
 
@@ -65,7 +61,7 @@ public class FakePlayerCommand extends Command {
         }
 
         FakePlayerEntity fake = new FakePlayerEntity(mc.world, mc.player, name);
-        mc.world.addEntity(fake);
+        fake.spawn();
         fakePlayers.put(key, fake);
         sendMessage("Spawned fake player " + Formatting.GREEN + name + Formatting.GRAY + ".");
     }
@@ -76,10 +72,7 @@ public class FakePlayerCommand extends Command {
             sendMessage("No fake player named " + name + " was found.");
             return;
         }
-        if (!fake.isRemoved()) {
-            mc.world.removeEntity(fake.getId(), Entity.RemovalReason.DISCARDED);
-            fake.setRemoved(Entity.RemovalReason.DISCARDED);
-        }
+        fake.despawn();
         sendMessage("Removed fake player " + name + ".");
     }
 
@@ -102,6 +95,6 @@ public class FakePlayerCommand extends Command {
     }
 
     private void usage() {
-        sendMessage("Usage: " + getCommandPrefix() + "fakeplayer [spawn <name>|remove <name>|list|clear]");
+        sendMessage("Usage: " + getCommandPrefix() + "fake-player <add [name]|remove <name>|list|clear>");
     }
 }

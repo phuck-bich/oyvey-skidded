@@ -6,14 +6,18 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.UUID;
 
 /** Client-only player clone that uses the local player's skin and equipment. */
 public class FakePlayerEntity extends OtherClientPlayerEntity implements Util {
+    private final ClientWorld spawnWorld;
+
     public FakePlayerEntity(ClientWorld world, PlayerEntity source, String name) {
         super(world, new GameProfile(UUID.randomUUID(), name));
+        this.spawnWorld = world;
         copyPositionAndRotation(source);
         setHeadYaw(source.getHeadYaw());
         setBodyYaw(source.getBodyYaw());
@@ -23,6 +27,21 @@ public class FakePlayerEntity extends OtherClientPlayerEntity implements Util {
                 EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD}) {
             equipStack(slot, source.getEquippedStack(slot).copy());
         }
+    }
+
+    public void spawn() {
+        if (isRemoved()) unsetRemoved();
+        spawnWorld.addEntity(this);
+    }
+
+    public void despawn() {
+        if (isRemoved()) return;
+        spawnWorld.removeEntity(getId(), Entity.RemovalReason.DISCARDED);
+        setRemoved(Entity.RemovalReason.DISCARDED);
+    }
+
+    public boolean belongsTo(ClientWorld world) {
+        return spawnWorld == world;
     }
 
     @Override
