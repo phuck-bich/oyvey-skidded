@@ -12,6 +12,7 @@ import me.alpha432.oyvey.features.modules.combat.Criticals;
 import me.alpha432.oyvey.features.modules.combat.CrystalAura;
 import me.alpha432.oyvey.features.modules.combat.PistonCrystal;
 import me.alpha432.oyvey.features.modules.combat.AutoMine;
+import me.alpha432.oyvey.features.modules.combat.AutoTrap;
 import me.alpha432.oyvey.features.modules.combat.Surround;
 import me.alpha432.oyvey.features.modules.misc.MCF;
 import me.alpha432.oyvey.features.modules.misc.PacketMine;
@@ -42,6 +43,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new CrystalAura());
     modules.add(new PistonCrystal());
         modules.add(new AutoMine());
+    modules.add(new AutoTrap());
         modules.add(new Surround());
         modules.add(new MCF());
         modules.add(new Step());
