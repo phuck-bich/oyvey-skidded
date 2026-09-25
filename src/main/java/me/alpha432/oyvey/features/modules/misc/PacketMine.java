@@ -151,6 +151,14 @@ public class PacketMine extends Module {
         return (BlockHitResult) mc.crosshairTarget;
     }
 
+    /**
+     * Allows another module, such as AutoMine, to select the packet-mine mode
+     * without exposing the setting itself.
+     */
+    public void setInstantMine(boolean enabled) {
+        instant.setValue(enabled);
+    }
+
     public boolean isMining(BlockPos pos) {
         if (pos == null) return false;
 
