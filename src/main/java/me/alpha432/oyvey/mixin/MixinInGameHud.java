@@ -1,6 +1,5 @@
 package me.alpha432.oyvey.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.alpha432.oyvey.event.impl.Render2DEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -20,8 +19,6 @@ public class MixinInGameHud {
     @Inject(method = "render", at = @At("RETURN"))
     public void render(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (MinecraftClient.getInstance().inGameHud.getDebugHud().shouldShowDebugHud()) return;
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-
         Render2DEvent event = new Render2DEvent(context, tickCounter.getTickProgress(true));
         EVENT_BUS.post(event);
     }

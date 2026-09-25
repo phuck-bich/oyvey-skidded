@@ -1,11 +1,9 @@
-```java
 package me.alpha432.oyvey.features.modules.combat;
 
 import com.google.common.eventbus.Subscribe;
-import me.alpha432.oyvey.Managers;
+import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.event.impl.Render3DEvent;
 import me.alpha432.oyvey.features.modules.Module;
-import me.alpha432.oyvey.util.math.RotationUtil;
 import me.alpha432.oyvey.util.render.RenderUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -98,15 +96,7 @@ public class KillAura extends Module {
         if (rotate) {
             Vec3d aimPos = getAimPosition(target);
 
-            float[] rotations = RotationUtil.getRotationsTo(
-                    mc.player.getEyePos(),
-                    aimPos
-            );
-
-            Managers.ROTATION.setPlayerRotations(
-                    rotations[0],
-                    rotations[1]
-            );
+            mc.player.lookAt(net.minecraft.command.argument.EntityAnchorArgumentType.EntityAnchor.EYES, aimPos);
         }
 
         mc.interactionManager.attackEntity(mc.player, target);
@@ -142,7 +132,7 @@ public class KillAura extends Module {
             return;
         }
 
-        float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
+        float tickDelta = mc.getRenderTickCounter().getTickProgress(true);
 
         Vec3d interpolatedPosition = target.getLerpedPos(tickDelta);
 
@@ -284,7 +274,7 @@ public class KillAura extends Module {
             return true;
         }
 
-        return !Managers.FRIEND.isFriend(
+        return !OyVey.friendManager.isFriend(
                 player.getName().getString()
         );
     }
@@ -334,7 +324,7 @@ public class KillAura extends Module {
             };
 
             for (double offset : offsets) {
-                Vec3d checkPosition = entity.getPos().add(
+                Vec3d checkPosition = entity.getEntityPos().add(
                         0.0d,
                         offset,
                         0.0d
@@ -359,7 +349,7 @@ public class KillAura extends Module {
             }
         }
 
-        return entity.getPos().add(
+        return entity.getEntityPos().add(
                 0.0d,
                 yOffset,
                 0.0d
@@ -368,7 +358,7 @@ public class KillAura extends Module {
 
     private boolean canSee(Entity entity) {
         return canSee(
-                entity.getPos().add(
+                entity.getEntityPos().add(
                         0.0d,
                         entity.getHeight() * 0.5d,
                         0.0d
@@ -399,5 +389,4 @@ public class KillAura extends Module {
         return targetMode;
     }
 }
-```
 

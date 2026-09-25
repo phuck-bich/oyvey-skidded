@@ -1,10 +1,9 @@
 package me.alpha432.oyvey.util.render;
 
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.render.RenderSetup;
 import net.minecraft.util.Util;
 
-import java.util.OptionalDouble;
 import java.util.function.Function;
 
 import static me.alpha432.oyvey.util.render.Pipelines.*;
@@ -21,20 +20,11 @@ public class Layers {
         return GLOBAL_QUADS;
     }
 
-    private static RenderLayer.MultiPhaseParameters.Builder builder() {
-        return RenderLayer.MultiPhaseParameters.builder();
-    }
-
-    private static RenderLayer.MultiPhaseParameters empty() {
-        return builder().build(false);
-    }
-
     static {
-        GLOBAL_QUADS = RenderLayer.of("global_fill", 156, GLOBAL_QUADS_PIPELINE, empty());
+        GLOBAL_QUADS = RenderLayer.of("global_fill", RenderSetup.builder(GLOBAL_QUADS_PIPELINE).translucent().expectedBufferSize(156).build());
 
         GLOBAL_LINES = Util.memoize(l -> {
-            RenderPhase.LineWidth width = new RenderPhase.LineWidth(OptionalDouble.of(l));
-            return RenderLayer.of("global_lines", 156, GLOBAL_LINES_PIPELINE, builder().lineWidth(width).build(false));
+            return RenderLayer.of("global_lines", RenderSetup.builder(GLOBAL_LINES_PIPELINE).translucent().expectedBufferSize(156).build());
         });
     }
 }

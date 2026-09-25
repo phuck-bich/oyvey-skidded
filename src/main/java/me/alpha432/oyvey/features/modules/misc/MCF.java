@@ -19,7 +19,7 @@ public class MCF extends Module {
             if (!pressed) {
                 Entity targetedEntity = mc.targetedEntity;
                 if (!(targetedEntity instanceof PlayerEntity)) return;
-                String name = ((PlayerEntity) targetedEntity).getGameProfile().getName();
+                String name = ((PlayerEntity) targetedEntity).getGameProfile().name();
 
                 if (OyVey.friendManager.isFriend(name)) {
                     OyVey.friendManager.removeFriend(name);

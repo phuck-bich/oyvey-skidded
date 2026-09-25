@@ -3,15 +3,22 @@ package me.alpha432.oyvey.util.render;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import me.alpha432.oyvey.util.traits.Util;
 import net.minecraft.client.render.*;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
 
 import java.awt.*;
 
 public class RenderUtil implements Util {
+
+    public static void rect(DrawContext context, float x1, float y1, float x2, float y2, int color) {
+        context.fill((int) Math.floor(Math.min(x1, x2)), (int) Math.floor(Math.min(y1, y2)),
+                (int) Math.ceil(Math.max(x1, x2)), (int) Math.ceil(Math.max(y1, y2)), color);
+    }
 
     public static void rect(MatrixStack stack, float x1, float y1, float x2, float y2, int color) {
         rectFilled(stack, x1, y1, x2, y2, color);
@@ -95,12 +102,13 @@ public class RenderUtil implements Util {
 
     // 3d
     public static void drawBoxFilled(MatrixStack stack, Box box, Color c) {
-        float minX = (float) (box.minX - mc.getEntityRenderDispatcher().camera.getPos().getX());
-        float minY = (float) (box.minY - mc.getEntityRenderDispatcher().camera.getPos().getY());
-        float minZ = (float) (box.minZ - mc.getEntityRenderDispatcher().camera.getPos().getZ());
-        float maxX = (float) (box.maxX - mc.getEntityRenderDispatcher().camera.getPos().getX());
-        float maxY = (float) (box.maxY - mc.getEntityRenderDispatcher().camera.getPos().getY());
-        float maxZ = (float) (box.maxZ - mc.getEntityRenderDispatcher().camera.getPos().getZ());
+        Vec3d cameraPos = mc.getEntityRenderDispatcher().camera.getCameraPos();
+        float minX = (float) (box.minX - cameraPos.getX());
+        float minY = (float) (box.minY - cameraPos.getY());
+        float minZ = (float) (box.minZ - cameraPos.getZ());
+        float maxX = (float) (box.maxX - cameraPos.getX());
+        float maxY = (float) (box.maxY - cameraPos.getY());
+        float maxZ = (float) (box.maxZ - cameraPos.getZ());
 
         BufferBuilder bufferBuilder = Tessellator.getInstance()
                 .begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
@@ -146,18 +154,19 @@ public class RenderUtil implements Util {
     }
 
     public static void drawBox(MatrixStack stack, Box box, Color c, double lineWidth) {
-        float minX = (float) (box.minX - mc.getEntityRenderDispatcher().camera.getPos().getX());
-        float minY = (float) (box.minY - mc.getEntityRenderDispatcher().camera.getPos().getY());
-        float minZ = (float) (box.minZ - mc.getEntityRenderDispatcher().camera.getPos().getZ());
-        float maxX = (float) (box.maxX - mc.getEntityRenderDispatcher().camera.getPos().getX());
-        float maxY = (float) (box.maxY - mc.getEntityRenderDispatcher().camera.getPos().getY());
-        float maxZ = (float) (box.maxZ - mc.getEntityRenderDispatcher().camera.getPos().getZ());
+        Vec3d cameraPos = mc.getEntityRenderDispatcher().camera.getCameraPos();
+        float minX = (float) (box.minX - cameraPos.getX());
+        float minY = (float) (box.minY - cameraPos.getY());
+        float minZ = (float) (box.minZ - cameraPos.getZ());
+        float maxX = (float) (box.maxX - cameraPos.getX());
+        float maxY = (float) (box.maxY - cameraPos.getY());
+        float maxZ = (float) (box.maxZ - cameraPos.getZ());
 
         BufferBuilder bufferBuilder = Tessellator.getInstance()
                 .begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR_NORMAL);
 
-        VertexRendering.drawBox(stack, bufferBuilder, minX, minY, minZ, maxX, maxY, maxZ,
-                c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f);
+        VertexRendering.drawOutline(stack, bufferBuilder, VoxelShapes.cuboid(minX, minY, minZ, maxX, maxY, maxZ),
+                0, 0, 0, c.getRGB(), (float) lineWidth);
 
         Layers.getGlobalLines(lineWidth).draw(bufferBuilder.end());
     }
@@ -175,7 +184,8 @@ public class RenderUtil implements Util {
         Camera camera = mc.gameRenderer.getCamera();
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
-        matrices.translate(pos.getX() - camera.getPos().x, pos.getY() - camera.getPos().y, pos.getZ() - camera.getPos().z);
+        Vec3d cameraPos = camera.getCameraPos();
+        matrices.translate(pos.getX() - cameraPos.x, pos.getY() - cameraPos.y, pos.getZ() - cameraPos.z);
         return matrices;
     }
 }

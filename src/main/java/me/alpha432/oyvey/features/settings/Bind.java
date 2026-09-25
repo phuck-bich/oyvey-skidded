@@ -33,7 +33,7 @@ public class Bind implements Util {
     public String toString() {
         return this.isEmpty() ? "None" : (this.key < 0
                 ? "None"
-                : this.capitalise(InputUtil.fromKeyCode(this.key, 0).getTranslationKey()));
+                : this.capitalise(InputUtil.fromKeyCode(new net.minecraft.client.input.KeyInput(this.key, 0, 0)).getTranslationKey()));
     }
 
     public boolean isDown() {

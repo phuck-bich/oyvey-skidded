@@ -1,11 +1,9 @@
 package me.alpha432.oyvey.mixin;
-import com.llamalad7.mixinextras.sugar.Local;
 import me.alpha432.oyvey.event.impl.Render3DEvent;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.ObjectAllocator;
+import net.minecraft.client.render.state.WorldRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.profiler.Profiler;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,10 +15,11 @@ import static me.alpha432.oyvey.util.traits.Util.mc;
 
 @Mixin( WorldRenderer.class )
 public class MixinWorldRenderer {
-    @Inject(method = "render", at = @At("RETURN"))
-    private void render(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline,
-                        Camera camera, GameRenderer gameRenderer, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci,
-                        @Local Profiler profiler) {
+    @Inject(method = "renderMain", at = @At("RETURN"))
+    private void renderMain(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Matrix4f positionMatrix,
+                            com.mojang.blaze3d.buffers.GpuBufferSlice fogBuffer, boolean renderBlockOutline,
+                            WorldRenderState renderState, RenderTickCounter tickCounter,
+                            net.minecraft.util.profiler.Profiler profiler, CallbackInfo ci) {
         MatrixStack stack = new MatrixStack();
         stack.push();
         stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(mc.gameRenderer.getCamera().getPitch()));
