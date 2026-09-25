@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "oyvey",
   "version": "${version}",
-  "name": "oyvey-ported",
+  "name": "Blender Client",
   "description": "free and opensource client base",
   "authors": [
     "3arthqu4ke",
