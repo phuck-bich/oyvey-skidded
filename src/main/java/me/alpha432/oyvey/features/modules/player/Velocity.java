@@ -12,6 +12,10 @@ public class Velocity extends Module {
     }
 
     @Subscribe private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket || event.getPacket() instanceof ExplosionS2CPacket) event.cancel();
+        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet) {
+            if (mc.player != null && packet.getEntityId() == mc.player.getId()) event.cancel();
+        } else if (event.getPacket() instanceof ExplosionS2CPacket) {
+            event.cancel();
+        }
     }
 }
