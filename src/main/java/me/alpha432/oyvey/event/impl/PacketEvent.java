@@ -27,4 +27,10 @@ public abstract class PacketEvent extends Event {
         }
     }
 
+    public static class Sent extends PacketEvent {
+        public Sent(Packet<?> packet) {
+            super(packet);
+        }
+    }
+
 }

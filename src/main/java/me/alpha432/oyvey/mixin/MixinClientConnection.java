@@ -46,5 +46,14 @@ public class MixinClientConnection {
         }
     }
 
+    @Inject(method = "sendImmediately", at = @At("TAIL"))
+    private void sendImmediatelyPost(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
+        if (this.side != NetworkSide.CLIENTBOUND || packet == null) return;
+        try {
+            EVENT_BUS.post(new PacketEvent.Sent(packet));
+        } catch (Exception e) {
+        }
+    }
+
 
 }
