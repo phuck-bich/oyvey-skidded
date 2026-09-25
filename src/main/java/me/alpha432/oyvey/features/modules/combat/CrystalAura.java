@@ -159,7 +159,7 @@ public class CrystalAura extends Module {
             doBreak();
         }
 
-        if (place.getValue() && (!sequential.getValue() || activeResult == null || activeResult.crystal == null)) {
+        if (place.getValue() && (!sequential.getValue() || activeResult == null)) {
             doPlace();
         }
 
