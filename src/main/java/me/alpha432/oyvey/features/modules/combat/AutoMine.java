@@ -122,14 +122,19 @@ public class AutoMine extends Module {
     }
 
     private void startMining(PacketMine miner, BlockPos pos) {
+        if (miner == null || !miner.isEnabled()) return;
         if (pos == null || isInvalid(pos) || isOutOfRange(pos)) return;
-        position = pos;
-        miner.startMiningPos(
+
+        boolean started = miner.startMiningPos(
                 pos,
                 nullDirection(pos),
                 doubleMine.getValue(),
                 instantMine.getValue()
         );
+
+        if (started) {
+            position = pos.toImmutable();
+        }
     }
 
     private BlockPos findHighestPriorityBlock(PlayerEntity player) {
@@ -166,9 +171,12 @@ public class AutoMine extends Module {
     }
 
     private BlockPos findBest(List<BlockPos> blocks) {
+        PacketMine miner = OyVey.moduleManager.getModuleByClass(PacketMine.class);
+
         List<BlockPos> candidates = blocks.stream().distinct()
                 .filter(p -> !isInvalid(p))
                 .filter(p -> !isOutOfRange(p))
+                .filter(p -> miner == null || !miner.isMining(p))
                 .toList();
 
         if (candidates.isEmpty()) return null;
@@ -363,10 +371,13 @@ public class AutoMine extends Module {
         BlockState state = mc.world.getBlockState(miningPos);
         if (!state.isOf(Blocks.OBSIDIAN)) return;
 
-        // Place the crystal immediately before the block finishes.
-        // This mirrors Sydney's CEV timing while using vanilla interaction calls.
         PacketMine miner = OyVey.moduleManager.getModuleByClass(PacketMine.class);
         if (miner == null) return;
+
+        // CEV should happen near the end of the break, not on the first tick.
+        // PacketMine owns the progress calculation, so use its authoritative
+        // progress instead of maintaining a second mining timer here.
+        if (miner.getMiningProgress(miningPos) < 0.75f) return;
 
         BlockPos crystalPos = miningPos.up();
         if (!mc.world.getBlockState(crystalPos).isAir()) return;
