@@ -194,14 +194,18 @@ public class PacketMine extends Module {
     }
 
     public boolean startMiningPos(BlockPos pos, Direction direction) {
+        return startMiningPos(pos, direction, doubleBreak.getValue());
+    }
+
+    public boolean startMiningPos(BlockPos pos, Direction direction, boolean forceDoubleBreak) {
         if (isPaused() || pos == null || direction == null) return false;
         if (!canMinePos(pos)) return false;
         if (isOutOfRange(pos)) return false;
 
-        MiningData newData = new MiningData(pos.toImmutable(), direction, progressBreak.getValue().floatValue(), this);
+        MiningData newData = new MiningData(pos.toImmutable(), direction, progressBreak.getValue().floatValue(), forceDoubleBreak, this);
 
         if (!miningQueue.isEmpty()) {
-            if (doubleBreak.getValue() && miningQueue.size() < 2) {
+            if (forceDoubleBreak && miningQueue.size() < 2) {
                 miningQueue.addLast(newData);
             } else {
                 MiningData old = miningQueue.removeFirst();
@@ -219,7 +223,7 @@ public class PacketMine extends Module {
     private void sendStartPacket(MiningData data) {
         if (mc.player == null || mc.player.networkHandler == null) return;
 
-        if (doubleBreak.getValue()) {
+        if (data.doubleMode) {
             sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
             sendAction(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, data.pos, data.direction);
             sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
@@ -257,7 +261,7 @@ public class PacketMine extends Module {
 
         sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
 
-        if (doubleBreak.getValue()) {
+        if (data.doubleMode) {
             sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
         }
 
@@ -487,6 +491,7 @@ public class PacketMine extends Module {
         private final BlockPos pos;
         private final Direction direction;
         private final float targetProgress;
+        private final boolean doubleMode;
         private final PacketMine parent;
 
         private BlockState state;
@@ -495,10 +500,11 @@ public class PacketMine extends Module {
         private boolean sawAir;
         private long unlockAt;
 
-        private MiningData(BlockPos pos, Direction direction, float targetProgress, PacketMine parent) {
+        private MiningData(BlockPos pos, Direction direction, float targetProgress, boolean doubleMode, PacketMine parent) {
             this.pos = pos;
             this.direction = direction;
             this.targetProgress = targetProgress;
+            this.doubleMode = doubleMode;
             this.parent = parent;
             this.state = mc.world.getBlockState(pos);
         }
