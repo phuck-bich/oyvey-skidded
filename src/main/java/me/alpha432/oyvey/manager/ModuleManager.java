@@ -25,6 +25,7 @@ import me.alpha432.oyvey.features.modules.combat.Surround;
 import me.alpha432.oyvey.features.modules.misc.MCF;
 import me.alpha432.oyvey.features.modules.misc.PacketMine;
 import me.alpha432.oyvey.features.modules.movement.ReverseStep;
+import me.alpha432.oyvey.features.modules.movement.Sneak;
 import me.alpha432.oyvey.features.modules.movement.Step;
 import me.alpha432.oyvey.features.modules.player.FastPlace;
 import me.alpha432.oyvey.features.modules.player.NoFall;
@@ -64,6 +65,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new MCF());
         modules.add(new Step());
         modules.add(new ReverseStep());
+        modules.add(new Sneak());
         modules.add(new FastPlace());
         modules.add(new PacketMine());
         modules.add(new Velocity());
