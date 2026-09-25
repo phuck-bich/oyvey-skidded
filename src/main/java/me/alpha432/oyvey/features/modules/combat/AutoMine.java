@@ -96,7 +96,7 @@ public class AutoMine extends Module {
             return;
         }
 
-        if (position != null && miner.isMining(position)) {
+        if (packetMine.getValue() && miner != null && position != null && miner.isMining(position)) {
             tickCevWhileMining(position);
             if (!isOutOfRange(position)) {
                 if (!mc.world.getBlockState(position).isAir()) return;
@@ -347,6 +347,8 @@ public class AutoMine extends Module {
 
     private void tickCevWhileMining(BlockPos miningPos) {
         if (!cev.getValue()) return;
+
+        if (!packetMine.getValue()) return;
 
         CrystalAura ca = OyVey.moduleManager.getModuleByClass(CrystalAura.class);
         if (ca == null || !ca.isEnabled()) return;
