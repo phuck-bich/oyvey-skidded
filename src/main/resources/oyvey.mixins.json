@@ -10,6 +10,7 @@
   "client": [
     "MixinClientPlayerEntity",
     "MixinClientPlayNetworkHandler",
+    "MixinDisconnectedScreen",
     "MixinInGameHud",
     "MixinKeyboard",
     "MixinKeyboardInput",

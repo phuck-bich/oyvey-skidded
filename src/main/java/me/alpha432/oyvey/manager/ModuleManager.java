@@ -14,6 +14,8 @@ import me.alpha432.oyvey.features.modules.misc.FakePlayer;
 import me.alpha432.oyvey.features.modules.misc.BetterChat;
 import me.alpha432.oyvey.features.modules.misc.AutoRespawn;
 import me.alpha432.oyvey.features.modules.misc.PacketLogger;
+import me.alpha432.oyvey.features.modules.misc.InventoryTweaks;
+import me.alpha432.oyvey.features.modules.misc.AutoReconnect;
 import me.alpha432.oyvey.features.modules.movement.ReverseStep;
 import me.alpha432.oyvey.features.modules.movement.ElytraFly;
 import me.alpha432.oyvey.features.modules.movement.EntityControl;
@@ -61,6 +63,8 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new BetterChat());
         modules.add(new AutoRespawn());
         modules.add(new PacketLogger());
+        modules.add(new InventoryTweaks());
+        modules.add(new AutoReconnect());
         modules.add(new Step());
         modules.add(new ReverseStep());
         modules.add(new Sneak());

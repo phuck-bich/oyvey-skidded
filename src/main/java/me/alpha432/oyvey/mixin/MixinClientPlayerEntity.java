@@ -5,17 +5,25 @@ import me.alpha432.oyvey.event.impl.UpdateEvent;
 import me.alpha432.oyvey.event.impl.UpdateWalkingPlayerEvent;
 import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.features.modules.movement.Sneak;
+import me.alpha432.oyvey.features.modules.misc.InventoryTweaks;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.PlayerInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static me.alpha432.oyvey.util.traits.Util.EVENT_BUS;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity {
+    @Inject(method = "dropSelectedItem", at = @At("HEAD"), cancellable = true)
+    private void protectValuableDrop(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
+        ClientPlayerEntity player = (ClientPlayerEntity) (Object) this;
+        if (InventoryTweaks.shouldBlockDrop(player.getMainHandStack())) cir.setReturnValue(false);
+    }
+
     @Inject(method = "sendMovementPackets", at = @At("HEAD"))
     private void forceSneakInMovementPackets(CallbackInfo ci) {
         if (OyVey.moduleManager == null) return;
