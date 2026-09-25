@@ -26,6 +26,7 @@ public class CommandManager
         commands.add(new FriendCommand());
         commands.add(new ModuleCommand());
         commands.add(new PrefixCommand());
+        commands.add(new FakePlayerCommand());
 
         commands.add(new HelpCommand());
     }
