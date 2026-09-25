@@ -110,6 +110,7 @@ public class PacketMine extends Module {
             int currentSlot = mc.player.getInventory().getSelectedSlot();
             if (lastSelectedSlot != -1 && currentSlot != lastSelectedSlot && !miningQueue.isEmpty()) {
                 MiningData first = miningQueue.removeFirst();
+                abortMining(first);
                 startFade(first);
             }
             lastSelectedSlot = currentSlot;
@@ -166,10 +167,6 @@ public class PacketMine extends Module {
             if (data.pos.equals(pos)) return true;
         }
 
-        for (FadeEntry entry : fadingBlocks) {
-            if (entry.pos.equals(pos)) return true;
-        }
-
         return false;
     }
 
@@ -179,6 +176,16 @@ public class PacketMine extends Module {
 
     public MiningData getPrevMiningData() {
         return miningQueue.size() > 1 ? miningQueue.get(1) : null;
+    }
+
+    public float getMiningProgress(BlockPos pos) {
+        if (pos == null) return 0.0f;
+        for (MiningData data : miningQueue) {
+            if (data.pos.equals(pos)) {
+                return MathHelper.clamp(data.damage / Math.max(data.targetProgress, 0.001f), 0.0f, 1.0f);
+            }
+        }
+        return 0.0f;
     }
 
     public boolean canMinePos(BlockPos pos) {
@@ -214,7 +221,14 @@ public class PacketMine extends Module {
         if (!canMinePos(pos)) return false;
         if (isOutOfRange(pos)) return false;
 
-        MiningData newData = new MiningData(pos.toImmutable(), direction, progressBreak.getValue().floatValue(), forceDoubleBreak, this);
+        MiningData newData = new MiningData(
+                pos.toImmutable(),
+                direction,
+                progressBreak.getValue().floatValue(),
+                forceDoubleBreak,
+                forceInstant,
+                this
+        );
 
         if (!miningQueue.isEmpty()) {
             if (forceDoubleBreak && miningQueue.size() < 2) {
@@ -235,12 +249,13 @@ public class PacketMine extends Module {
     private void sendStartPacket(MiningData data, boolean forceInstant) {
         if (mc.player == null || mc.player.networkHandler == null) return;
 
-        if (data.doubleMode) {
+        // Meteor's core behavior is START -> STOP once the mining request is armed.
+        // We keep the packet sequence vanilla-compatible and let the queue itself
+        // provide the actual double-mine behavior.
+        sendAction(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, data.pos, data.direction);
+
+        if (forceInstant) {
             sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
-            sendAction(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, data.pos, data.direction);
-            sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
-        } else {
-            sendAction(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, data.pos, data.direction);
         }
 
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
@@ -248,6 +263,11 @@ public class PacketMine extends Module {
 
     private void sendAction(PlayerActionC2SPacket.Action action, BlockPos pos, Direction direction) {
         mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(action, pos, direction));
+    }
+
+    private void abortMining(MiningData data) {
+        if (data == null || mc.player == null || mc.player.networkHandler == null) return;
+        sendAction(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, data.pos, data.direction);
     }
 
     private void attemptMine(MiningData data) {
@@ -273,17 +293,15 @@ public class PacketMine extends Module {
 
         sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
 
-        if (data.doubleMode) {
-            sendAction(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.pos, data.direction);
-        }
-
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
         if (awaitBreak.getValue() && canAwaitBreak(data)) {
             mc.interactionManager.breakBlock(data.pos);
         }
 
-        if (toolSlot >= 0 && toolSlot < 9 && toolSlot != previous && autoSwap.getValue() != AutoSwap.None) {
+        if (toolSlot >= 0 && toolSlot < 9 && toolSlot != previous
+                && autoSwap.getValue() != AutoSwap.None
+                && autoSwap.getValue() != AutoSwap.Normal) {
             mc.player.getInventory().setSelectedSlot(previous);
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(previous));
         }
@@ -504,6 +522,7 @@ public class PacketMine extends Module {
         private final Direction direction;
         private final float targetProgress;
         private final boolean doubleMode;
+        private final boolean instantMode;
         private final PacketMine parent;
 
         private BlockState state;
@@ -511,14 +530,24 @@ public class PacketMine extends Module {
         private boolean remine;
         private boolean sawAir;
         private long unlockAt;
+        private long startTime;
 
-        private MiningData(BlockPos pos, Direction direction, float targetProgress, boolean doubleMode, PacketMine parent) {
+        private MiningData(
+                BlockPos pos,
+                Direction direction,
+                float targetProgress,
+                boolean doubleMode,
+                boolean instantMode,
+                PacketMine parent
+        ) {
             this.pos = pos;
             this.direction = direction;
             this.targetProgress = targetProgress;
             this.doubleMode = doubleMode;
+            this.instantMode = instantMode;
             this.parent = parent;
             this.state = mc.world.getBlockState(pos);
+            this.startTime = System.currentTimeMillis();
         }
 
         private void onBecameAir() {
@@ -527,7 +556,7 @@ public class PacketMine extends Module {
         }
 
         private void onBecameSolid() {
-            if (!parent.reBreak.getValue() || !parent.instant.getValue() || !sawAir) return;
+            if (!parent.reBreak.getValue() || !instantMode || !sawAir) return;
 
             sawAir = false;
             remine = true;
@@ -536,13 +565,21 @@ public class PacketMine extends Module {
         }
 
         private boolean process() {
-            if (mc.world.getBlockState(pos).isAir()) {
+            BlockState worldState = mc.world.getBlockState(pos);
+
+            if (worldState.isAir()) {
                 if (!parent.reBreak.getValue()) return true;
-                onBecameAir();
+                if (!sawAir) onBecameAir();
                 return false;
             }
 
-            state = mc.world.getBlockState(pos);
+            state = worldState;
+
+            // Prevent a stale request from living forever if the server never
+            // acknowledges the break.
+            if (System.currentTimeMillis() - startTime > 5000L && !remine) {
+                return true;
+            }
 
             if (remine) {
                 if (System.currentTimeMillis() < unlockAt) return false;
@@ -550,26 +587,29 @@ public class PacketMine extends Module {
                 damage = 1.0f;
                 parent.attemptMine(this);
                 damage = 0.0f;
-                remine = true;
+                unlockAt = System.currentTimeMillis() + Math.max(25L, parent.instantDelay.getValue());
                 return false;
             }
 
             float speed = getDigSpeed(state);
             if (speed <= 0.0f) return false;
 
+            float hardness = Math.max(state.getHardness(mc.world, pos), 0.1f);
+            float divisor = state.isToolRequired() ? 30.0f : 100.0f;
+
             damage = MathHelper.clamp(
-                    damage + speed / Math.max(state.getHardness(mc.world, pos), 0.1f)
-                            / (state.isToolRequired() ? 100.0f : 30.0f),
+                    damage + speed / hardness / divisor,
                     0.0f,
                     1.0f
             );
 
-            if (damage >= targetProgress && !state.isAir()) {
+            if (damage >= targetProgress) {
                 parent.attemptMine(this);
 
                 if (!parent.reBreak.getValue()) return true;
 
                 damage = 0.0f;
+                startTime = System.currentTimeMillis();
             }
 
             return false;
