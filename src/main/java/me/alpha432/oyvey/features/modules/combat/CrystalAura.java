@@ -8,9 +8,7 @@ import me.alpha432.oyvey.util.render.RenderUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -99,13 +97,15 @@ public class CrystalAura extends Module {
 
     private BlockPos renderPlacePos;
     private BlockPos renderBreakPos;
-    private Box smoothBox;
+    private Box smoothPlaceBox;
+    private Box smoothBreakBox;
     private double renderDamage;
     private long placeRenderUntil;
     private long breakRenderUntil;
 
     private long lastCalculationNanos;
     private long calculations;
+    private long lastSnapshotNanos;
 
     public CrystalAura() {
         super("CrystalAura",
@@ -122,7 +122,8 @@ public class CrystalAura extends Module {
         activeResult = null;
         renderPlacePos = null;
         renderBreakPos = null;
-        smoothBox = null;
+        smoothPlaceBox = null;
+        smoothBreakBox = null;
         renderDamage = 0.0d;
         placeRenderUntil = 0L;
         breakRenderUntil = 0L;
@@ -141,7 +142,8 @@ public class CrystalAura extends Module {
         activeResult = null;
         renderPlacePos = null;
         renderBreakPos = null;
-        smoothBox = null;
+        smoothPlaceBox = null;
+        smoothBreakBox = null;
     }
 
     @Override
@@ -186,6 +188,7 @@ public class CrystalAura extends Module {
 
     private Snapshot createSnapshot() {
         if (mc.player == null || mc.world == null) return null;
+        lastSnapshotNanos = System.nanoTime();
 
         List<TargetSnapshot> targets = new ArrayList<>();
         double targetRangeSq = targetRange.getValue() * targetRange.getValue();
@@ -238,7 +241,7 @@ public class CrystalAura extends Module {
                     double allowed = canSee(center) ? placeRange.getValue() : wallRange.getValue();
                     if (distanceSq > allowed * allowed) continue;
 
-                    float selfDamage = crystalDamage(mc.player, center, crystalPos, false);
+                    float selfDamage = crystalDamage(mc.player, center);
                     if (selfDamage > maxSelfDamage.getValue()) continue;
                     if (antiSuicide.getValue() && selfDamage >= mc.player.getHealth() + mc.player.getAbsorptionAmount()) continue;
 
@@ -246,7 +249,7 @@ public class CrystalAura extends Module {
                     TargetSnapshot bestTarget = null;
 
                     for (TargetSnapshot target : targets) {
-                        float damage = crystalDamage(target.entity, center, crystalPos, true);
+                        float damage = crystalDamage(target.entity, center, target.position);
                         if (smart.getValue() && target.hurtTime > 0) continue;
                         if (damage > targetDamage) {
                             targetDamage = damage;
@@ -317,7 +320,7 @@ public class CrystalAura extends Module {
             double allowed = canSee(center) ? breakRange : wallRange.getValue();
             if (distanceSq > allowed * allowed) continue;
 
-            float selfDamage = crystalDamage(mc.player, center, crystal.getBlockPos(), false);
+            float selfDamage = crystalDamage(mc.player, center);
             if (selfDamage > maxSelfDamage.getValue()) continue;
             if (antiSuicide.getValue() && selfDamage >= mc.player.getHealth() + mc.player.getAbsorptionAmount()) continue;
 
@@ -329,7 +332,7 @@ public class CrystalAura extends Module {
                 if (player.squaredDistanceTo(mc.player) > targetRange.getValue() * targetRange.getValue()) continue;
                 if (OyVey.friendManager != null && OyVey.friendManager.isFriend(player.getName().getString())) continue;
 
-                float damage = crystalDamage(player, center, crystal.getBlockPos(), true);
+                float damage = crystalDamage(player, center);
                 if (smart.getValue() && player.hurtTime > 0) continue;
 
                 if (damage > targetDamage) {
@@ -518,11 +521,15 @@ public class CrystalAura extends Module {
      * The expensive world/raycast work is deliberately performed while creating
      * the snapshot; the worker thread only ranks immutable candidates.
      */
-    private float crystalDamage(PlayerEntity target, Vec3d explosion, BlockPos crystalPos, boolean targetIsEnemy) {
-        double distance = Math.sqrt(target.squaredDistanceTo(explosion));
+    private float crystalDamage(PlayerEntity target, Vec3d explosion) {
+        return crystalDamage(target, explosion, target.getPos());
+    }
+
+    private float crystalDamage(PlayerEntity target, Vec3d explosion, Vec3d predictedPosition) {
+        double distance = Math.sqrt(predictedPosition.squaredDistanceTo(explosion));
         if (distance > 12.0d) return 0.0f;
 
-        double exposure = calculateExposure(explosion, target);
+        double exposure = calculateExposure(explosion, target, predictedPosition);
         double impact = (1.0d - distance / 12.0d) * exposure;
         if (impact <= 0.0d) return 0.0f;
 
@@ -538,8 +545,12 @@ public class CrystalAura extends Module {
         return (float) Math.max(0.0d, damage);
     }
 
-    private double calculateExposure(Vec3d explosion, PlayerEntity entity) {
-        Box box = entity.getBoundingBox();
+    private double calculateExposure(Vec3d explosion, PlayerEntity entity, Vec3d position) {
+        Box current = entity.getBoundingBox();
+        double dx = position.x - entity.getX();
+        double dy = position.y - entity.getY();
+        double dz = position.z - entity.getZ();
+        Box box = current.offset(dx, dy, dz);
 
         int samples = 3;
         int visible = 0;
@@ -572,6 +583,13 @@ public class CrystalAura extends Module {
     }
 
     @Override
+    public void onUnload() {
+        if (!calculationExecutor.isShutdown()) {
+            calculationExecutor.shutdownNow();
+        }
+    }
+
+    @Override
     public void onRender3D(me.alpha432.oyvey.event.impl.Render3DEvent event) {
         if (renderMode.getValue() == RenderMode.None) return;
 
@@ -598,11 +616,17 @@ public class CrystalAura extends Module {
             case Smooth -> {
                 Box target = new Box(pos);
 
-                if (smoothBox == null) smoothBox = target;
-
-                double factor = 1.0d / Math.max(1, smoothness.getValue());
-                smoothBox = interpolateBox(smoothBox, target, factor);
-                drawBox(event, smoothBox, side, line);
+                if (breaking) {
+                    if (smoothBreakBox == null) smoothBreakBox = target;
+                    double factor = 1.0d / Math.max(1, smoothness.getValue());
+                    smoothBreakBox = interpolateBox(smoothBreakBox, target, factor);
+                    drawBox(event, smoothBreakBox, side, line);
+                } else {
+                    if (smoothPlaceBox == null) smoothPlaceBox = target;
+                    double factor = 1.0d / Math.max(1, smoothness.getValue());
+                    smoothPlaceBox = interpolateBox(smoothPlaceBox, target, factor);
+                    drawBox(event, smoothPlaceBox, side, line);
+                }
             }
 
             case Fading -> {
