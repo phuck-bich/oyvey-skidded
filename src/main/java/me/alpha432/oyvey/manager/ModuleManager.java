@@ -16,6 +16,7 @@ import me.alpha432.oyvey.features.modules.combat.AutoTrap;
 import me.alpha432.oyvey.features.modules.combat.HoleFiller;
 import me.alpha432.oyvey.features.modules.combat.Offhand;
 import me.alpha432.oyvey.features.modules.combat.AutoWeb;
+import me.alpha432.oyvey.features.modules.combat.AutoLog;
 import me.alpha432.oyvey.features.modules.combat.Surround;
 import me.alpha432.oyvey.features.modules.misc.MCF;
 import me.alpha432.oyvey.features.modules.misc.PacketMine;
@@ -50,6 +51,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new HoleFiller());
         modules.add(new Offhand());
         modules.add(new AutoWeb());
+        modules.add(new AutoLog());
         modules.add(new Surround());
         modules.add(new MCF());
         modules.add(new Step());
