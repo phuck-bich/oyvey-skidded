@@ -206,6 +206,10 @@ public class PacketMine extends Module {
     }
 
     public boolean startMiningPos(BlockPos pos, Direction direction, boolean forceDoubleBreak) {
+        return startMiningPos(pos, direction, forceDoubleBreak, instant.getValue());
+    }
+
+    public boolean startMiningPos(BlockPos pos, Direction direction, boolean forceDoubleBreak, boolean forceInstant) {
         if (isPaused() || pos == null || direction == null) return false;
         if (!canMinePos(pos)) return false;
         if (isOutOfRange(pos)) return false;
@@ -224,11 +228,11 @@ public class PacketMine extends Module {
             miningQueue.add(newData);
         }
 
-        sendStartPacket(newData);
+        sendStartPacket(newData, forceInstant);
         return true;
     }
 
-    private void sendStartPacket(MiningData data) {
+    private void sendStartPacket(MiningData data, boolean forceInstant) {
         if (mc.player == null || mc.player.networkHandler == null) return;
 
         if (data.doubleMode) {
