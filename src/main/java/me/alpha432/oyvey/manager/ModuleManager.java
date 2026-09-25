@@ -28,6 +28,7 @@ import me.alpha432.oyvey.features.modules.movement.Sneak;
 import me.alpha432.oyvey.features.modules.movement.Sprint;
 import me.alpha432.oyvey.features.modules.movement.Step;
 import me.alpha432.oyvey.features.modules.player.FastPlace;
+import me.alpha432.oyvey.features.modules.player.AntiHunger;
 import me.alpha432.oyvey.features.modules.player.AntiAFK;
 import me.alpha432.oyvey.features.modules.player.AutoClicker;
 import me.alpha432.oyvey.features.modules.player.AutoReplenish;
@@ -40,6 +41,19 @@ import me.alpha432.oyvey.features.modules.player.EXPThrower;
 import me.alpha432.oyvey.features.modules.player.NoFall;
 import me.alpha432.oyvey.features.modules.player.Velocity;
 import me.alpha432.oyvey.features.modules.render.BlockHighlight;
+import me.alpha432.oyvey.features.modules.render.ESP;
+import me.alpha432.oyvey.features.modules.render.HoleESP;
+import me.alpha432.oyvey.features.modules.render.BreakIndicators;
+import me.alpha432.oyvey.features.modules.render.StorageESP;
+import me.alpha432.oyvey.features.modules.render.ItemHighlight;
+import me.alpha432.oyvey.features.modules.render.LogoutSpots;
+import me.alpha432.oyvey.features.modules.render.Predictions;
+import me.alpha432.oyvey.features.modules.render.NoRender;
+import me.alpha432.oyvey.features.modules.render.Fullbright;
+import me.alpha432.oyvey.features.modules.render.Trajectories;
+import me.alpha432.oyvey.features.modules.render.BetterTooltips;
+import me.alpha432.oyvey.features.modules.render.BetterTab;
+import me.alpha432.oyvey.features.modules.render.PopChams;
 import me.alpha432.oyvey.util.traits.Jsonable;
 import me.alpha432.oyvey.util.traits.Util;
 
@@ -77,6 +91,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new ElytraFly());
         modules.add(new NoRotate());
         modules.add(new FastPlace());
+        modules.add(new AntiHunger());
         modules.add(new AntiAFK());
         modules.add(new AutoClicker());
         modules.add(new AutoReplenish());
@@ -88,6 +103,19 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new EXPThrower());
         modules.add(new Velocity());
         modules.add(new BlockHighlight());
+        modules.add(new ESP());
+        modules.add(new HoleESP());
+        modules.add(new BreakIndicators());
+        modules.add(new StorageESP());
+        modules.add(new ItemHighlight());
+        modules.add(new LogoutSpots());
+        modules.add(new Predictions());
+        modules.add(new NoRender());
+        modules.add(new Fullbright());
+        modules.add(new Trajectories());
+        modules.add(new BetterTooltips());
+        modules.add(new BetterTab());
+        modules.add(new PopChams());
         modules.add(new NoFall());
     }
 
