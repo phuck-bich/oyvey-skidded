@@ -136,6 +136,15 @@ public class SpeedMine extends Module {
         return (BlockHitResult) mc.crosshairTarget;
     }
 
+    public boolean startMining(BlockPos position) {
+        return handle(position, 0);
+    }
+
+    public boolean isMining(BlockPos position) {
+        return (primary != null && primary.position.equals(position))
+                || (secondary != null && secondary.position.equals(position));
+    }
+
     private boolean handle(BlockPos position, int priority) {
         if (position == null) return false;
         if (mc.interactionManager.getCurrentGameMode() == GameMode.CREATIVE
@@ -162,11 +171,6 @@ public class SpeedMine extends Module {
         }
 
         return true;
-    }
-
-    private boolean isMining(BlockPos position) {
-        return (primary != null && primary.position.equals(position))
-                || (secondary != null && secondary.position.equals(position));
     }
 
     private boolean isInvalid(BlockPos position) {
