@@ -61,8 +61,8 @@ public class PacketMine extends Module {
     private final Setting<Shape> shape = mode("Shape", Shape.Both);
     private final Setting<ColorMode> colorMode = mode("Color", ColorMode.Gradient);
     private final Setting<RenderMode> renderMode = mode("Render", RenderMode.Grow);
-    private final Setting<Color> fillColor = new Setting<>("Fill", new Color(255, 0, 0, 100));
-    private final Setting<Color> outlineColor = new Setting<>("Outline", new Color(255, 255, 255, 255));
+    private final Setting<Integer> fillAlpha = num("Fill Alpha", 100, 0, 255);
+    private final Setting<Integer> outlineAlpha = num("Outline Alpha", 255, 0, 255);
     private final Setting<Boolean> renderAir = bool("Render Air", true);
     private final Setting<Integer> fadeSpeed = num("Fade Speed", 300, 50, 1000);
     private final Setting<Boolean> easing = bool("Easing", true);
@@ -434,14 +434,13 @@ public class PacketMine extends Module {
     }
 
     private Color getColor(float progress, boolean fill, float alpha) {
-        int baseAlpha = fill ? fillColor.getValue().getAlpha() : outlineColor.getValue().getAlpha();
+        int baseAlpha = fill ? fillAlpha.getValue() : outlineAlpha.getValue();
         int a = MathHelper.clamp((int) (baseAlpha * alpha), 0, 255);
 
         return switch (colorMode.getValue()) {
-            case Custom -> {
-                Color c = fill ? fillColor.getValue() : outlineColor.getValue();
-                yield new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
-            }
+            case Custom -> fill
+                    ? new Color(255, 0, 0, a)
+                    : new Color(255, 255, 255, a);
             case Normal -> progress >= 0.9f
                     ? new Color(0, 255, 0, a)
                     : new Color(255, 0, 0, a);
