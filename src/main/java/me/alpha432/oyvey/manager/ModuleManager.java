@@ -9,6 +9,7 @@ import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.features.modules.client.ClickGui;
 import me.alpha432.oyvey.features.modules.client.HudModule;
 import me.alpha432.oyvey.features.modules.combat.Criticals;
+import me.alpha432.oyvey.features.modules.combat.CrystalAura;
 import me.alpha432.oyvey.features.modules.misc.MCF;
 import me.alpha432.oyvey.features.modules.movement.ReverseStep;
 import me.alpha432.oyvey.features.modules.movement.Step;
@@ -34,6 +35,7 @@ public class ModuleManager implements Jsonable, Util {
         modules.add(new HudModule());
         modules.add(new ClickGui());
         modules.add(new Criticals());
+        modules.add(new CrystalAura());
         modules.add(new MCF());
         modules.add(new Step());
         modules.add(new ReverseStep());
@@ -61,30 +63,22 @@ public class ModuleManager implements Jsonable, Util {
 
     public void enableModule(Class<Module> clazz) {
         Module module = this.getModuleByClass(clazz);
-        if (module != null) {
-            module.enable();
-        }
+        if (module != null) module.enable();
     }
 
     public void disableModule(Class<Module> clazz) {
         Module module = this.getModuleByClass(clazz);
-        if (module != null) {
-            module.disable();
-        }
+        if (module != null) module.disable();
     }
 
     public void enableModule(String name) {
         Module module = this.getModuleByName(name);
-        if (module != null) {
-            module.enable();
-        }
+        if (module != null) module.enable();
     }
 
     public void disableModule(String name) {
         Module module = this.getModuleByName(name);
-        if (module != null) {
-            module.disable();
-        }
+        if (module != null) module.disable();
     }
 
     public boolean isModuleEnabled(String name) {
@@ -124,11 +118,9 @@ public class ModuleManager implements Jsonable, Util {
     }
 
     public ArrayList<Module> getModulesByCategory(Module.Category category) {
-        ArrayList<Module> modulesCategory = new ArrayList<Module>();
+        ArrayList<Module> modulesCategory = new ArrayList<>();
         this.modules.forEach(module -> {
-            if (module.getCategory() == category) {
-                modulesCategory.add(module);
-            }
+            if (module.getCategory() == category) modulesCategory.add(module);
         });
         return modulesCategory;
     }
@@ -175,25 +167,19 @@ public class ModuleManager implements Jsonable, Util {
     }
 
     public void onUnloadPost() {
-        for (Module module : this.modules) {
-            module.enabled.setValue(false);
-        }
+        for (Module module : this.modules) module.enabled.setValue(false);
     }
 
     public void onKeyPressed(int eventKey) {
         if (eventKey <= 0) return;
         this.modules.forEach(module -> {
-            if (module.getBind().getKey() == eventKey) {
-                module.toggle();
-            }
+            if (module.getBind().getKey() == eventKey) module.toggle();
         });
     }
 
     @Override public JsonElement toJson() {
         JsonObject object = new JsonObject();
-        for (Module module : modules) {
-            object.add(module.getName(), module.toJson());
-        }
+        for (Module module : modules) object.add(module.getName(), module.toJson());
         return object;
     }
 
